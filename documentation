@@ -1,0 +1,23 @@
+Multi-Vendor Ecommerce Backend | Server
+Folder Structure
+config
+    Database connection using mongoose to connect mongoDB
+
+controllers
+middleware
+models
+routes
+
+
+Dependencies
+express js
+mongoose
+body-parser
+    Express body-parser is an npm module used to process data sent in an HTTP request body. It provides four express middleware for parsing JSON, Text, URL-encoded, and raw data sets over an HTTP request body. Before the target controller receives an incoming request, these middleware routines handle it.
+
+cors
+    CORS is a browser security feature that restricts cross-origin HTTP requests with other servers and specifies which domains access your resources.
+    CORS stands for Cross-Origin Resource Sharing
+
+express-async-handler
+    Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers.
