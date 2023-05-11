@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
-const User = require('../models/User');
+// const User = require('../models/User');
 
 // Generate Token
 const generateToken = (user) => {
@@ -48,8 +48,9 @@ const verifyToken = asyncHandler(async (req, res, next) => {
 })
 
 
+
 // Export the following middleware modules
 module.exports = {
     generateToken,
-    verifyToken
+    verifyToken,
 }

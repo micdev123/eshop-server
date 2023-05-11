@@ -3,44 +3,53 @@ const asyncHandler = require('express-async-handler');
 const { generateToken } = require("../middleware/authMiddleware.js");
 const validator = require("validator");
 const { v4: uuidv4 } = require('uuid');
-const { sendMagicLink } = require('./emailController')
+const { sendMagicLink } = require('./mailer.js');
+// const { sendMagicLink } = require('./emailController')
 
 // Create | Register User Account
 const RegisterUser = asyncHandler(async (req, res) => {
     // Get input data from req.body to check if email exist
     const { fullName, email, mobile } = req.body;
 
-    const alreadyRegistered = await User.findOne({ email: email }) // Check the email if already registered
+    const alreadyRegistered = await User.findOne({ email }) // Check the email if already registered
     
-    // If not registered
-    if (!alreadyRegistered) {
-        // Create the account
-        const newUser = new User({
-            fullName: fullName,
-            email: email,
-            mobile: mobile,
-            magicLink: uuidv4()
-        })
-        // Using try catch to minimize error
-        try {
-            // Saving new user to database
-            const saveNewUser = await newUser.save();
-            const { ...others } = saveNewUser._doc;
-
-            // send magic link to email
-            let sendEmail = sendMagicLink(email, saveNewUser.magicLink, 'sign-up');
-
-            // Sending the following if status code == 200
-           res.status(200).json({ ...others, accessToken: generateToken(saveNewUser) })
-        }
-        catch (error) {
-            res.status(500).json(error)
-        }
-
-    }
-    else { // Throw an error with the message user already registered
+    // If already registered
+    if (alreadyRegistered) {
         throw new Error("User Already Registered!");
     }
+    // Create the account
+    const newUser = new User({
+        fullName,
+        email,
+        mobile,
+        emailToken: uuidv4()
+    });
+    // Validate
+    if (!fullName || !email || !mobile) {
+        return res.status(400).json({ message: "All fields are required..." })
+    }
+
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ message: "Email must be a valid email..." })
+    }
+    // Using try catch to minimize error
+    try {
+        // Saving new user to database
+        const saveNewUser = await newUser.save();
+        const { ...others } = saveNewUser._doc;
+
+        // send magic link to email
+        let magic_link = `${process.env.CLIENT_BASE_URL}verify-email/${newUser.emailToken}`
+
+        await sendMagicLink(newUser, "Registration Confirmation Link", magic_link);
+
+        // Sending the following if status code == 200
+        res.status(200).json({ ...others, accessToken: generateToken(saveNewUser) })
+    }
+    catch (error) {
+        res.status(500).json(error)
+    }
+
 })
 
 // Login User
@@ -91,7 +100,48 @@ const LoginUser = asyncHandler(async(req, res) => {
 })
 
 
+
+// Verify MagicLink | emailToken
+const VerifyEmailToken = asyncHandler(async (req, res) => {
+    // console.log("test");
+    try {
+        const emailToken  = req.params.emailToken; //Get emailToken
+        
+        // Check if emailToken exist
+        if (!emailToken) {
+            return res.status(400).json({ message: "EmailToken not found!" });
+        }
+
+        // If exist go ahead and find the user with that emailToken
+        const user = await User.findOne({ emailToken });
+
+        // If user exist
+        if (user) {
+            user.emailToken = null // Set the emailToken to null
+            user.isVerified = true // Set isVerified to true
+
+            const updateVersion = await user.save(); // The save the updated user to database
+            const { ...others } = updateVersion._doc;
+            // Return
+            res.status(200).json({
+                ...others,
+                accessToken: generateToken(updateVersion),
+            });
+        }
+        else {
+            res.status(404).json({ message: "Email verification failed, invalid emailToken!" });
+        }
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json(error.message)
+    }
+})
+
+
+
 module.exports = {
     RegisterUser,
-    LoginUser
+    LoginUser,
+    VerifyEmailToken
 }

@@ -24,16 +24,16 @@ var userSchema = new mongoose.Schema(
             type: String,
             default: "user",
         },
-        magicLink: { 
-            type     : String, 
-            required : false,
-            unique   : false,
-            default  : uuidv4
+        emailToken: { // Link used to authenticated the user
+            type: String, 
+            required: false,
+            unique: false,
+            default: uuidv4
         },
-        magicLinkExpired: { 
-            type     : Boolean, 
-            default  : false
-        }
+        isVerified: { // Indicate whether user emailToken send by email has been verified
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );
