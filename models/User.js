@@ -1,9 +1,8 @@
 const mongoose = require('mongoose'); // Erase if already required
-const { v4: uuidv4 } = require('uuid');
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema(
     {
-        fullName: {
+        name: {
             type: String,
             required: true,
         },
@@ -12,25 +11,17 @@ var userSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
-        mobile: {
+        picture: {
             type: String,
-            required: true,
-            unique: true,
         },
-        profilePic: {
+        location: {
             type: String,
         },
         role: {
             type: String,
             default: "user",
         },
-        emailToken: { // Link used to authenticated the user
-            type: String, 
-            required: false,
-            unique: false,
-            default: uuidv4
-        },
-        isVerified: { // Indicate whether user emailToken send by email has been verified
+        emailVerified: { // Indicate whether user emailToken send by email has been verified
             type: Boolean,
             default: false,
         },

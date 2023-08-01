@@ -20,7 +20,7 @@ const sendMagicLink = async (user, subject, magic_link) => {
         const mailGenerator = new Mailgen({
             theme: "default",
             product : {
-                name: "e-shop. Online Marketplace",
+                name: "e-shop. Your Marketplace",
                 link : 'https://mailgen.js/'
             }
         })
@@ -28,8 +28,8 @@ const sendMagicLink = async (user, subject, magic_link) => {
         // The email
         let email = {
             body: {
-                name: user?.fullName,
-                intro: 'Welcome to e-shop Online Marketplace! We\'re very excited to have you on board.',
+                name: user?.name,
+                intro: 'Welcome to e-shop Your Marketplace! We\'re very excited to have you on board.',
                 action: {
                     instructions: 'Click the link to confirm your account:',
                     button: {
@@ -43,12 +43,12 @@ const sendMagicLink = async (user, subject, magic_link) => {
             }
         };
 
-    
+
         const mailOptions = {
             from: process.env.MAIL_EMAIL,
             to: user?.email,
-			subject,
-			html: mailGenerator.generate(email),
+            subject,
+            html: mailGenerator.generate(email),
         }
 
         await transporter.sendMail(mailOptions)
